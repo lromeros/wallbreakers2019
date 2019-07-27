@@ -1,11 +1,29 @@
 class Solution:
-    def find_next_course(self, all_prereqs: List[List[int]], visited: List[bool]) -> List[int]:
-        for i in range(len(all_prereqs)):
-            if not visited[i] and len(all_prereqs[i]) > 0:
-                return [i]
-        return []
         
+    def has_cycle_dfs(self, all_prereqs: List[List[int]], course: int, visited: List[int]) -> bool:  
+        print(f"calling recursive with {course}")
+        print(f"visited looks like: {visited}")
+        if course in visited:
+            print(f"already visited that course :O")
+            return True
+        else:
+            visited.append(course)
+        
+        og_visited = copy.copy(visited)
+
+        if len(all_prereqs) > 0:
+            for prereq in all_prereqs[course]:
+                if self.has_cycle_dfs(all_prereqs, prereq, visited):
+                    print(f"found a cycle")
+                    return True
+                else:
+                    visited = og_visited
+        
+        return False
+
+    
     def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+        print("================================================================")
         # creating the adjacency lists
         all_prereqs = [[] for _ in range(numCourses)]
         
@@ -13,27 +31,10 @@ class Solution:
         for course, prereq in prerequisites:
             all_prereqs[course].append(prereq)
         
-        overall_visited = [False for _ in range(numCourses)]
-        visited_this_time = overall_visited
-        next_courses = self.find_next_course(all_prereqs, overall_visited)
-
-        while len(next_courses) > 0:
-            course = next_courses.pop()
-            if visited_this_time[course]:
-                print(f"course {course} already visited this time")
-                return False
-            elif len(all_prereqs[course]) > 0:
-                print(f"course {course} not visited this time and has children")
-                visited_this_time[course] = True
-                overall_visited[course] = True
-                for p in all_prereqs[course]:
-                    if p not in next_courses:
-                        next_courses.append(p)
-                        
-            if len(next_courses) == 0:
-                print(f"the stack is empty, lets try to fix that")
-                next_courses = self.find_next_course(all_prereqs, overall_visited)
-                visited_this_time = [False for _ in range(numCourses)]
-            print(f"stack = {next_courses}")
-
+        for i in range(numCourses):
+            if len(all_prereqs[i]) > 0:
+                print(f"from the top, calling on {i}")
+                if self.has_cycle_dfs(all_prereqs, i, []):
+                    return False
+        
         return True
