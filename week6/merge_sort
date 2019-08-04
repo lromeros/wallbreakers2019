@@ -1,0 +1,2 @@
+#!/bin/bash
+python3 merge_sort_aux/merge_sort.py
